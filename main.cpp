@@ -2,17 +2,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "Display.h"
-#include "Emulator.h"
+#include "CPU.h"
 #include <time.h>
 
 bool Init();
-void RenderScreen(Display *_disp, Emulator *emu);
+void RenderScreen(Display *_disp, CPU *cpu);
 
 int main(int argc, char** argv) {
 	Init();
-	Emulator* emu = new Emulator;
-	Display disp;
-	disp.create("CHIP8", 640, 320);
+	CPU* cpu = new CPU;
+	Display* disp = new Display;
+	disp->create("CHIP8", 640, 320);
 	SDL_Event ev;
 	bool quit = 0;
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	emu->LoadInMemory(0x200, buff, ROMSize);
+	cpu->LoadInMemory(0x200, buff, ROMSize);
 
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
@@ -85,18 +85,18 @@ int main(int argc, char** argv) {
 			PressedKey = 0xF;
 		else if (keyboard[SDL_SCANCODE_LCTRL] || keyboard[SDL_SCANCODE_RCTRL]) {
 			if (keyboard[SDL_SCANCODE_R]) {
-				free(emu);
-				emu = new Emulator;
-				emu->LoadInMemory(0x200, buff, ROMSize);
+				free(cpu);
+				cpu = new CPU;
+				cpu->LoadInMemory(0x200, buff, ROMSize);
 			}
 		}
 
-		emu->Step(PressedKey);
-		RenderScreen(&disp, emu);
+		cpu->Step(PressedKey);
 
 		double currentclock = clock() / (double) CLOCKS_PER_SEC;
-		if (currentclock - LastDraw >= (double)1 / 30) {
-			disp.update();
+
+		if (currentclock - LastDraw >= (double)1 / 60) {
+			disp->update(cpu->screen, 64, 32, 10);
 			LastDraw = currentclock;
 		}
 	}
@@ -113,11 +113,11 @@ bool Init() {
 	return success;
 }
 
-void RenderScreen(Display *_disp, Emulator *emu) {
+void RenderScreen(Display *_disp, CPU *cpu) {
 	for (int y = 0; y < 32; y++) {
 		for (int x = 0; x < 64; x++) {
 			SDL_Rect rct = { x * 10, y * 10, 10, 10 };
-			if (emu->screen[y][x] == 1)
+			if (cpu->screen[y][x] == 1)
 				SDL_SetRenderDrawColor(_disp->getRenderer(), 0xff, 0xff, 0xff, 0xff);
 			else
 				SDL_SetRenderDrawColor(_disp->getRenderer(), 0x00, 0x00, 0x00, 0x00);

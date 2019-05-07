@@ -1,10 +1,10 @@
 #pragma once
-class Emulator
+class CPU
 {
 public:
-	Emulator();
-	virtual ~Emulator();
-	bool screen[32][64];
+	CPU();
+	virtual ~CPU();
+	short int screen[32][64];
 
 	void LoadInMemory(short int addr, unsigned char* buffer, short int size);
 	void Step(short int PressedKey);
@@ -17,8 +17,8 @@ private:
 	short int PC;
 	short int Delay_Timer;
 	short int Sound_Timer;
-	int lastclock;
-	int clockspeed;
+	double lastclock;
+	double clockspeed;
 	bool Halt;
 };
 

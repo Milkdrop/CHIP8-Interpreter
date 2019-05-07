@@ -10,7 +10,7 @@ public:
 	Display();
 	~Display();
 	void create(std::string _name, int _width, int _height);
-	void update();
+	void update(short int screen[32][64], int width, int height, int PixelSize);
 	SDL_Renderer* getRenderer();
 private:
 	SDL_Window* main_window;
