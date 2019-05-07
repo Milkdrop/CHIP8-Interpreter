@@ -1,12 +1,6 @@
 #include "Display.h"
 
-Display::Display() {
-}
-
-Display::~Display() {
-}
-
-void Display::create(std::string _name, int _width, int _height) {
+Display::Display(std::string _name, int _width, int _height) {
 	bool success = 1;
 	main_window = SDL_CreateWindow(_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_SHOWN);
 	if (main_window == NULL) {
@@ -36,7 +30,10 @@ void Display::create(std::string _name, int _width, int _height) {
 	}
 }
 
-void Display::update(short int screen[32][64], int width, int height, int PixelSize) {
+Display::~Display() {
+}
+
+void Display::update(short int screen[][64], int width, int height, int PixelSize) {
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			SDL_Rect rct = { x * PixelSize, y * PixelSize, PixelSize, PixelSize};
@@ -44,15 +41,14 @@ void Display::update(short int screen[32][64], int width, int height, int PixelS
 				SDL_SetRenderDrawColor(main_renderer, 0x00, 0x00, 0x00, 0x00);
 			else
 				SDL_SetRenderDrawColor(main_renderer, 0xff, 0xff, 0xff, 0xff);
-			
+
 			SDL_RenderFillRect(main_renderer, &rct);
 		}
 	}
 	SDL_RenderPresent(main_renderer);
 }
 
-SDL_Renderer* Display::getRenderer()
-{
+SDL_Renderer* Display::getRenderer() {
 	return main_renderer;
 }
 

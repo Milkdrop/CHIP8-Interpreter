@@ -4,12 +4,10 @@
 #include<stdio.h>
 #include<string>
 
-class Display
-{
+class Display {
 public:
-	Display();
+	Display(std::string _name, int _width, int _height);
 	~Display();
-	void create(std::string _name, int _width, int _height);
 	void update(short int screen[32][64], int width, int height, int PixelSize);
 	SDL_Renderer* getRenderer();
 private:

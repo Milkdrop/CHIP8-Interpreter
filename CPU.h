@@ -1,10 +1,16 @@
 #pragma once
-class CPU
-{
+
+struct _AudioData {
+	bool PlaySquare;
+	double PlaySquareDuration;
+};
+
+class CPU {
 public:
 	CPU();
 	virtual ~CPU();
 	short int screen[32][64];
+	_AudioData AudioData;
 
 	void LoadInMemory(short int addr, unsigned char* buffer, short int size);
 	void Step(short int PressedKey);
@@ -17,8 +23,8 @@ private:
 	short int PC;
 	short int Delay_Timer;
 	short int Sound_Timer;
-	double lastclock;
-	double clockspeed;
+	unsigned long lastclock;
+	unsigned long clockspeed;
 	bool Halt;
 };
 

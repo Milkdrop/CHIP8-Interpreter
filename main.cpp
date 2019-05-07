@@ -3,25 +3,28 @@
 #include <SDL2/SDL_image.h>
 #include "Display.h"
 #include "CPU.h"
+#include "Sound.h"
 #include <time.h>
 
-bool Init();
-void RenderScreen(Display *_disp, CPU *cpu);
-
 int main(int argc, char** argv) {
-	Init();
-	CPU* cpu = new CPU;
-	Display* disp = new Display;
-	disp->create("CHIP8", 640, 320);
-	SDL_Event ev;
-	bool quit = 0;
-
 	if (argc <= 1) {
 		printf("Please also provide the rom file to run!\n");
 		printf("%s", argv[0]);
 		printf(" ROM.ch8\n");
 		return 0;
 	}
+
+	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
+		fprintf(stderr, "SDL failed to initialize: %s", SDL_GetError());
+		return 1;
+	}
+	
+	CPU* cpu = new CPU;
+	Display* disp = new Display("CHIP8", 640, 320);
+	Sound snd;
+	
+	SDL_Event ev;
+	bool quit = 0;
 
 	printf("Trying to open file %s...\n", argv[1]);
 	FILE* fin = fopen(argv[1], "rb");
@@ -42,7 +45,8 @@ int main(int argc, char** argv) {
 
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
-	double LastDraw = 0;
+	unsigned long lastdraw = 0;
+
 	while (!quit) {
 		short int PressedKey = -1;
 		while (SDL_PollEvent(&ev)) {
@@ -92,37 +96,20 @@ int main(int argc, char** argv) {
 		}
 
 		cpu->Step(PressedKey);
+		
+		if (cpu->AudioData.PlaySquare) {
+			snd.Play(1, 400, cpu->AudioData.PlaySquareDuration);
+		}
 
-		double currentclock = clock() / (double) CLOCKS_PER_SEC;
+		unsigned long currentclock = (unsigned long) clock();
+		if (currentclock < lastdraw)
+			lastdraw = 0;
 
-		if (currentclock - LastDraw >= (double)1 / 60) {
+		if ((currentclock - lastdraw) * 60 >= 1000000) {
 			disp->update(cpu->screen, 64, 32, 10);
-			LastDraw = currentclock;
+			lastdraw = currentclock;
 		}
 	}
 
 	return 0;
-}
-
-bool Init() {
-	bool success = 1;
-	if (SDL_Init(SDL_INIT_EVERYTHING)<0) {
-		success = 0;
-		fprintf(stderr, "SDL failed to init! %s", SDL_GetError());
-	}
-	return success;
-}
-
-void RenderScreen(Display *_disp, CPU *cpu) {
-	for (int y = 0; y < 32; y++) {
-		for (int x = 0; x < 64; x++) {
-			SDL_Rect rct = { x * 10, y * 10, 10, 10 };
-			if (cpu->screen[y][x] == 1)
-				SDL_SetRenderDrawColor(_disp->getRenderer(), 0xff, 0xff, 0xff, 0xff);
-			else
-				SDL_SetRenderDrawColor(_disp->getRenderer(), 0x00, 0x00, 0x00, 0x00);
-			
-			SDL_RenderFillRect(_disp->getRenderer(), &rct);
-		}
-	}
 }
