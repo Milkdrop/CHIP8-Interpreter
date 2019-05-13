@@ -15,13 +15,6 @@ Display::Display(std::string _name, int _width, int _height) {
 		} else {
 			//Initialize renderer color
 			SDL_SetRenderDrawColor(main_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-			//Initialize PNG loading
-			int imgFlags = IMG_INIT_PNG;
-			if (!(IMG_Init(imgFlags) & imgFlags)) {
-				fprintf(stderr, "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-				success = false;
-			}
 		}
 	}
 
@@ -36,7 +29,7 @@ Display::~Display() {
 void Display::update(short int screen[][64], int width, int height, int PixelSize) {
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			SDL_Rect rct = { x * PixelSize, y * PixelSize, PixelSize, PixelSize};
+			SDL_Rect rct = {x * PixelSize, y * PixelSize, PixelSize, PixelSize};
 			if (screen[y][x] == 0)
 				SDL_SetRenderDrawColor(main_renderer, 0x00, 0x00, 0x00, 0x00);
 			else
